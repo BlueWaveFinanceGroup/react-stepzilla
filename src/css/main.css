@@ -1,6 +1,6 @@
 ol.progtrckr {
   line-height: 1;
-  font-size: 62.5%;
+  font-size: 75%;
   width: 90%;
   margin: 1em auto;
   border-radius: .25em;
@@ -63,6 +63,7 @@ ol.progtrckr a:hover {
   /* steps already visited */
   background-color: #cccccc;
   border-color: #cccccc;
+  text-decoration: none;
 }
 
 ol.progtrckr li > * {
