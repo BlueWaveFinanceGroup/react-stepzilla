@@ -10,7 +10,7 @@
     "test:watch": "node ./node_modules/gulp/bin/gulp.js test-watch",
     "test:coverage": "node ./node_modules/gulp/bin/gulp.js test-coverage",
     "prepublish": "npm run build",
-    "example": "webpack-dev-server",
+    "example": "webpack-dev-server --open",
     "build-example": "node ./node_modules/gulp/bin/gulp.js build-example"
   },
   "repository": {
@@ -77,6 +77,5 @@
     "react": "^15.5.4",
     "react-dom": "^15.5.4"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

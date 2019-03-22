@@ -171,6 +171,7 @@ var StepZilla = function (_Component) {
         this.setNavState(evt);
       } else {
         // the main navigation step ui is invoking a jump between steps
+        var targetValue = evt.currentTarget.value;
         // if stepsNavigation is turned off or user clicked on existing step again (on step 2 and clicked on 2 again) then ignore
         if (!this.props.stepsNavigation || evt.target.value === this.state.compState) {
           evt.preventDefault();
@@ -182,7 +183,7 @@ var StepZilla = function (_Component) {
         // evt is a react event so we need to persist it as we deal with aync promises which nullifies these events (https://facebook.github.io/react/docs/events.html#event-pooling)
         evt.persist();
 
-        var movingBack = evt.target.value < this.state.compState; // are we trying to move back or front?
+        var movingBack = targetValue < this.state.compState; // are we trying to move back or front?
         var passThroughStepsNotValid = false; // if we are jumping forward, only allow that if inbetween steps are all validated. This flag informs the logic...
         var proceed = false; // flag on if we should move on
 
@@ -202,7 +203,7 @@ var StepZilla = function (_Component) {
               // looks like we are moving forward, 'reduce' a new array of step>validated values we need to check and
               // ... 'some' that to get a decision on if we should allow moving forward
               passThroughStepsNotValid = _this3.props.steps.reduce(function (a, c, i) {
-                if (i >= _this3.state.compState && i < evt.target.value) {
+                if (i >= _this3.state.compState && i < targetValue) {
                   a.push(c.validated);
                 }
                 return a;
@@ -219,10 +220,10 @@ var StepZilla = function (_Component) {
         }).then(function () {
           // this is like finally(), executes if error no no error
           if (proceed && !passThroughStepsNotValid) {
-            if (evt.target.value === _this3.props.steps.length - 1 && _this3.state.compState === _this3.props.steps.length - 1) {
+            if (targetValue === _this3.props.steps.length - 1 && _this3.state.compState === _this3.props.steps.length - 1) {
               _this3.setNavState(_this3.props.steps.length);
             } else {
-              _this3.setNavState(evt.target.value);
+              _this3.setNavState(targetValue);
             }
           }
         }).catch(function (e) {
@@ -368,7 +369,7 @@ var StepZilla = function (_Component) {
             i + 1
           ),
           _react2.default.createElement(
-            'span',
+            'a',
             null,
             _this5.props.steps[i].name
           )
