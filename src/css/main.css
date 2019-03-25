@@ -66,8 +66,6 @@ ol.progtrckr.custom-separator li::after {
 
 ol.progtrckr em {
   display: inline;
-  font-weight: 700;
-  /*padding-left: 1rem;*/
 }
 
 ol.progtrckr li a {
@@ -80,6 +78,7 @@ ol.progtrckr li.progtrckr-doing a {
 
 ol.progtrckr li.progtrckr-doing em {
   padding-right: 0.5rem;
+  font-weight: 700;
 }
 
 ol.progtrckr li.progtrckr-doing em::after {
@@ -162,6 +161,7 @@ ol.progtrckr li.progtrckr-doing em::after {
 
   ol.progtrckr li a, ol.progtrckr li.progtrckr-doing a {
     display: flex;
+    font-weight: inherit;
   }
 
   ol.progtrckr a:hover {
