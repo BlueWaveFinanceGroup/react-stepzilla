@@ -173,7 +173,7 @@ var StepZilla = function (_Component) {
         // the main navigation step ui is invoking a jump between steps
         var targetValue = evt.currentTarget.value;
         // if stepsNavigation is turned off or user clicked on existing step again (on step 2 and clicked on 2 again) then ignore
-        if (!this.props.stepsNavigation || evt.target.value === this.state.compState) {
+        if (!this.props.stepsNavigation || targetValue === this.state.compState) {
           evt.preventDefault();
           evt.stopPropagation();
 
@@ -434,6 +434,7 @@ var StepZilla = function (_Component) {
               },
               id: 'prev-button'
             },
+            this.props.backButtonChildren,
             this.props.backButtonText
           ),
           _react2.default.createElement(
@@ -446,6 +447,7 @@ var StepZilla = function (_Component) {
               },
               id: 'next-button'
             },
+            this.props.nextButtonChildren,
             nextStepText
           )
         )
@@ -486,8 +488,10 @@ StepZilla.propTypes = {
   dontValidate: _propTypes2.default.bool,
   preventEnterSubmission: _propTypes2.default.bool,
   startAtStep: _propTypes2.default.number,
-  nextButtonText: _propTypes2.default.string,
+  nextButtonChildren: _propTypes2.default.object,
   nextButtonCls: _propTypes2.default.string,
+  nextButtonText: _propTypes2.default.string,
+  backButtonChildren: _propTypes2.default.object,
   backButtonCls: _propTypes2.default.string,
   backButtonText: _propTypes2.default.string,
   hocValidationAppliedTo: _propTypes2.default.array,
