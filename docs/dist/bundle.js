@@ -22089,11 +22089,17 @@
 	      this.sampleStore = _extends({}, this.sampleStore, update);
 	    }
 	  }, {
+	    key: 'beforeStepChanged',
+	    value: function beforeStepChanged(prevStep, nextStep) {
+	      console.log('prevstep: ' + prevStep);
+	      console.log('nextstep: ' + nextStep);
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
 	      var _this2 = this;
 
-	      var steps = [{ name: 'Consider your Options', component: _react2.default.createElement(_Step2.default, { getStore: function getStore() {
+	      var steps = [{ name: 'Consider your Options', nextFunctionName: 'submit', component: _react2.default.createElement(_Step2.default, { getStore: function getStore() {
 	            return _this2.getStore();
 	          }, updateStore: function updateStore(u) {
 	            _this2.updateStore(u);
@@ -22129,6 +22135,9 @@
 	            startAtStep: window.sessionStorage.getItem('step') ? parseFloat(window.sessionStorage.getItem('step')) : 0,
 	            onStepChange: function onStepChange(step) {
 	              return window.sessionStorage.setItem('step', step);
+	            },
+	            onBeforeStepChange: function onBeforeStepChange(prevStep, nextStep) {
+	              return _this2.beforeStepChanged(prevStep, nextStep);
 	            }
 	          })
 	        )
@@ -22283,6 +22292,9 @@
 	  }, {
 	    key: 'setNavState',
 	    value: function setNavState(next) {
+	      if (this.props.onBeforeStepChange) {
+	        this.props.onBeforeStepChange(this.state.compState, next);
+	      }
 	      this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
 
 	      if (next < this.props.steps.length) {
@@ -22642,6 +22654,7 @@
 	  backButtonCls: _propTypes2.default.string,
 	  backButtonText: _propTypes2.default.string,
 	  hocValidationAppliedTo: _propTypes2.default.array,
+	  onBeforeStepChange: _propTypes2.default.func,
 	  onStepChange: _propTypes2.default.func
 	};
 

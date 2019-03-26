@@ -38,6 +38,11 @@ export default class Example extends Component {
     }
   }
 
+  beforeStepChanged(prevStep, nextStep) {
+    console.log('prevstep: ' + prevStep);
+    console.log('nextstep: ' + nextStep);
+  }
+
   render() {
     const steps =
     [
@@ -58,6 +63,7 @@ export default class Example extends Component {
             hocValidationAppliedTo={[3]}
             startAtStep={window.sessionStorage.getItem('step') ? parseFloat(window.sessionStorage.getItem('step')) : 0}
             onStepChange={(step) => window.sessionStorage.setItem('step', step)}
+            onBeforeStepChange={(prevStep, nextStep) => this.beforeStepChanged(prevStep, nextStep)}
            />
         </div>
       </div>

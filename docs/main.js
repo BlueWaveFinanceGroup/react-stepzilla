@@ -136,6 +136,9 @@ var StepZilla = function (_Component) {
   }, {
     key: 'setNavState',
     value: function setNavState(next) {
+      if (this.props.onBeforeStepChange) {
+        this.props.onBeforeStepChange(this.state.compState, next);
+      }
       this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
 
       if (next < this.props.steps.length) {
@@ -495,5 +498,6 @@ StepZilla.propTypes = {
   backButtonCls: _propTypes2.default.string,
   backButtonText: _propTypes2.default.string,
   hocValidationAppliedTo: _propTypes2.default.array,
+  onBeforeStepChange: _propTypes2.default.func,
   onStepChange: _propTypes2.default.func
 };

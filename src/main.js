@@ -93,6 +93,9 @@ export default class StepZilla extends Component {
 
   // set the nav state
   setNavState(next) {
+    if (this.props.onBeforeStepChange) {
+      this.props.onBeforeStepChange(this.state.compState, next);
+    }
     this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
 
     if (next < this.props.steps.length) {
@@ -379,5 +382,6 @@ StepZilla.propTypes = {
   backButtonCls: PropTypes.string,
   backButtonText: PropTypes.string,
   hocValidationAppliedTo: PropTypes.array,
+  onBeforeStepChange: PropTypes.func,
   onStepChange: PropTypes.func
 };
