@@ -92,9 +92,9 @@ export default class StepZilla extends Component {
   }
 
   // set the nav state
-  setNavState(next) {
+  async setNavState(next) {
     if (this.props.onBeforeStepChange) {
-      this.props.onBeforeStepChange(this.state.compState, next);
+      await this.props.onBeforeStepChange(this.state.compState, next);
     }
     this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
 

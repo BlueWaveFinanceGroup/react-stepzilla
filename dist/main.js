@@ -20,6 +20,8 @@ var _promise2 = _interopRequireDefault(_promise);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new _promise2.default(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return _promise2.default.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -135,18 +137,43 @@ var StepZilla = function (_Component) {
 
   }, {
     key: 'setNavState',
-    value: function setNavState(next) {
-      if (this.props.onBeforeStepChange) {
-        this.props.onBeforeStepChange(this.state.compState, next);
-      }
-      this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
+    value: function () {
+      var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(next) {
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                if (!this.props.onBeforeStepChange) {
+                  _context.next = 3;
+                  break;
+                }
 
-      if (next < this.props.steps.length) {
-        this.setState({ compState: next });
+                _context.next = 3;
+                return this.props.onBeforeStepChange(this.state.compState, next);
+
+              case 3:
+                this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
+
+                if (next < this.props.steps.length) {
+                  this.setState({ compState: next });
+                }
+
+                this.checkNavState(next);
+
+              case 6:
+              case 'end':
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function setNavState(_x) {
+        return _ref.apply(this, arguments);
       }
 
-      this.checkNavState(next);
-    }
+      return setNavState;
+    }()
 
     // handles keydown on enter being pressed in any Child component input area. in this case it goes to the next (ignore textareas as they should allow line breaks)
 
