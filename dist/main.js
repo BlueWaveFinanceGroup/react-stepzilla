@@ -52,10 +52,20 @@ var StepZilla = function (_Component) {
     return _this;
   }
 
-  // extend the "steps" array with flags to indicate if they have been validated
-
-
   _createClass(StepZilla, [{
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate(prevProps) {
+      if (prevProps.currentStep !== this.props.currentStep) {
+        this.setState({
+          compState: this.props.currentStep,
+          navState: this.getNavStates(this.props.currentStep, this.props.steps.length)
+        });
+      }
+    }
+
+    // extend the "steps" array with flags to indicate if they have been validated
+
+  }, {
     key: 'applyValidationFlagsToSteps',
     value: function applyValidationFlagsToSteps() {
       var _this2 = this;
@@ -152,15 +162,18 @@ var StepZilla = function (_Component) {
                 return this.props.onBeforeStepChange(this.state.compState, next);
 
               case 3:
-                this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
 
-                if (next < this.props.steps.length) {
-                  this.setState({ compState: next });
+                if (!this.props.dontAllowStepMoves) {
+                  this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
+
+                  if (next < this.props.steps.length) {
+                    this.setState({ compState: next });
+                  }
+
+                  this.checkNavState(next);
                 }
 
-                this.checkNavState(next);
-
-              case 6:
+              case 4:
               case 'end':
                 return _context.stop();
             }
@@ -318,7 +331,7 @@ var StepZilla = function (_Component) {
     value: function updateStepValidationFlag() {
       var val = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
 
-      this.props.steps[this.state.compState].validated = val; // note: if a step component returns 'underfined' then treat as "true".
+      this.props.steps[this.state.compState].validated = val; // note: if a step component returns 'undefined' then treat as "true".
     }
 
     // are we allowed to move forward? via the next button or via jumpToStep?
@@ -414,6 +427,7 @@ var StepZilla = function (_Component) {
     value: function render() {
       var _this6 = this;
 
+      console.log('compState: ' + this.state.compState);
       var props = this.props;
 
       var _getPrevNextBtnLayout = this.getPrevNextBtnLayout(this.state.compState),
@@ -497,8 +511,10 @@ StepZilla.defaultProps = {
   stepsNavigation: true,
   prevBtnOnLastStep: true,
   dontValidate: false,
+  dontAllowStepMoves: false,
   preventEnterSubmission: false,
   startAtStep: 0,
+  currentStep: 0,
   nextButtonText: 'Next',
   nextButtonCls: 'btn btn-prev btn-primary btn-lg pull-right',
   backButtonText: 'Previous',
@@ -516,8 +532,10 @@ StepZilla.propTypes = {
   stepsNavigation: _propTypes2.default.bool,
   prevBtnOnLastStep: _propTypes2.default.bool,
   dontValidate: _propTypes2.default.bool,
+  dontAllowStepMoves: _propTypes2.default.bool,
   preventEnterSubmission: _propTypes2.default.bool,
   startAtStep: _propTypes2.default.number,
+  currentStep: _propTypes2.default.number,
   nextButtonChildren: _propTypes2.default.object,
   nextButtonCls: _propTypes2.default.string,
   nextButtonText: _propTypes2.default.string,

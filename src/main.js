@@ -21,7 +21,7 @@ export default class StepZilla extends Component {
     this.applyValidationFlagsToSteps();
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
+  componentDidUpdate(prevProps) {
     if (prevProps.currentStep !== this.props.currentStep) {
       this.setState({
         compState: this.props.currentStep,
