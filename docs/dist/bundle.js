@@ -31851,7 +31851,6 @@
 	    value: function render() {
 	      var _this6 = this;
 
-	      console.log('compState: ' + this.state.compState);
 	      var props = this.props;
 
 	      var _getPrevNextBtnLayout = this.getPrevNextBtnLayout(this.state.compState),

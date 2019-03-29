@@ -301,7 +301,6 @@ export default class StepZilla extends Component {
 
   // main render of stepzilla container
   render() {
-    console.log(`compState: ${this.state.compState}`);
     const { props } = this;
     const { nextStepText, showNextBtn, showPreviousBtn } = this.getPrevNextBtnLayout(this.state.compState);
 
