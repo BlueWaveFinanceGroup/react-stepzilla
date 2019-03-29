@@ -21,6 +21,15 @@ export default class StepZilla extends Component {
     this.applyValidationFlagsToSteps();
   }
 
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    if (prevProps.currentStep !== this.props.currentStep) {
+      this.setState({
+        compState: this.props.currentStep,
+        navState: this.getNavStates(this.props.currentStep, this.props.steps.length)
+      });
+    }
+  }
+
   // extend the "steps" array with flags to indicate if they have been validated
   applyValidationFlagsToSteps() {
     this.props.steps.map((i, idx) => {
@@ -96,13 +105,16 @@ export default class StepZilla extends Component {
     if (this.props.onBeforeStepChange) {
       await this.props.onBeforeStepChange(this.state.compState, next);
     }
-    this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
 
-    if (next < this.props.steps.length) {
-      this.setState({ compState: next });
+    if (!this.props.dontAllowStepMoves) {
+      this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
+
+      if (next < this.props.steps.length) {
+        this.setState({ compState: next });
+      }
+
+      this.checkNavState(next);
     }
-
-    this.checkNavState(next);
   }
 
   // handles keydown on enter being pressed in any Child component input area. in this case it goes to the next (ignore textareas as they should allow line breaks)
@@ -227,7 +239,7 @@ export default class StepZilla extends Component {
 
   // update step's validation flag
   updateStepValidationFlag(val = true) {
-    this.props.steps[this.state.compState].validated = val; // note: if a step component returns 'underfined' then treat as "true".
+    this.props.steps[this.state.compState].validated = val; // note: if a step component returns 'undefined' then treat as "true".
   }
 
   // are we allowed to move forward? via the next button or via jumpToStep?
@@ -289,6 +301,7 @@ export default class StepZilla extends Component {
 
   // main render of stepzilla container
   render() {
+    console.log(`compState: ${this.state.compState}`);
     const { props } = this;
     const { nextStepText, showNextBtn, showPreviousBtn } = this.getPrevNextBtnLayout(this.state.compState);
 
@@ -351,8 +364,10 @@ StepZilla.defaultProps = {
   stepsNavigation: true,
   prevBtnOnLastStep: true,
   dontValidate: false,
+  dontAllowStepMoves: false,
   preventEnterSubmission: false,
   startAtStep: 0,
+  currentStep: 0,
   nextButtonText: 'Next',
   nextButtonCls: 'btn btn-prev btn-primary btn-lg pull-right',
   backButtonText: 'Previous',
@@ -373,8 +388,10 @@ StepZilla.propTypes = {
   stepsNavigation: PropTypes.bool,
   prevBtnOnLastStep: PropTypes.bool,
   dontValidate: PropTypes.bool,
+  dontAllowStepMoves: PropTypes.bool,
   preventEnterSubmission: PropTypes.bool,
   startAtStep: PropTypes.number,
+  currentStep: PropTypes.number,
   nextButtonChildren: PropTypes.object,
   nextButtonCls: PropTypes.string,
   nextButtonText: PropTypes.string,
