@@ -31806,12 +31806,16 @@
 
 	  }, {
 	    key: 'getClassName',
-	    value: function getClassName(className, i) {
+	    value: function getClassName(className, i, additionalClassName) {
 	      var liClassName = className + '-' + this.state.navState.styles[i];
 
 	      // if step ui based navigation is disabled, then dont highlight step
 	      if (!this.props.stepsNavigation) {
 	        liClassName += ' no-hl';
+	      }
+
+	      if (additionalClassName !== undefined && additionalClassName !== null) {
+	        liClassName += ' ' + additionalClassName;
 	      }
 
 	      return liClassName;
@@ -31827,7 +31831,7 @@
 	      return this.props.steps.map(function (s, i) {
 	        return _react2.default.createElement(
 	          'li',
-	          { className: _this5.getClassName('progtrckr', i), onClick: function onClick(evt) {
+	          { className: _this5.getClassName('progtrckr', i, _this5.props.steps[i].additionalClassName), onClick: function onClick(evt) {
 	              _this5.jumpToStep(evt);
 	            }, key: i, value: i },
 	          _react2.default.createElement(
@@ -31948,7 +31952,8 @@
 	StepZilla.propTypes = {
 	  steps: _propTypes2.default.arrayOf(_propTypes2.default.shape({
 	    name: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.object]).isRequired,
-	    component: _propTypes2.default.element.isRequired
+	    component: _propTypes2.default.element.isRequired,
+	    additionalClassName: _propTypes2.default.string
 	  })).isRequired,
 	  showSteps: _propTypes2.default.bool,
 	  showNavigation: _propTypes2.default.bool,

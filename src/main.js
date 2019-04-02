@@ -278,12 +278,16 @@ export default class StepZilla extends Component {
   }
 
   // get the classmame of steps
-  getClassName(className, i) {
+  getClassName(className, i, additionalClassName) {
     let liClassName = `${className}-${this.state.navState.styles[i]}`;
 
     // if step ui based navigation is disabled, then dont highlight step
     if (!this.props.stepsNavigation) {
       liClassName += ' no-hl';
+    }
+
+    if (additionalClassName !== undefined && additionalClassName !== null) {
+      liClassName += ` ${additionalClassName}`;
     }
 
     return liClassName;
@@ -292,7 +296,7 @@ export default class StepZilla extends Component {
   // render the steps as stepsNavigation
   renderSteps() {
     return this.props.steps.map((s, i) => (
-      <li className={this.getClassName('progtrckr', i)} onClick={(evt) => { this.jumpToStep(evt); }} key={i} value={i}>
+      <li className={this.getClassName('progtrckr', i, this.props.steps[i].additionalClassName)} onClick={(evt) => { this.jumpToStep(evt); }} key={i} value={i}>
           <em>{i + 1}</em>
           <a>{this.props.steps[i].name}</a>
       </li>
@@ -380,7 +384,8 @@ StepZilla.propTypes = {
       PropTypes.string,
       PropTypes.object
     ]).isRequired,
-    component: PropTypes.element.isRequired
+    component: PropTypes.element.isRequired,
+    additionalClassName: PropTypes.string
   })).isRequired,
   showSteps: PropTypes.bool,
   showNavigation: PropTypes.bool,
