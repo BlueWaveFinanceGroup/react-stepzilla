@@ -2,6 +2,9 @@
 .vim/viminfo
 .vim/swaps/*
 .vim/undo
+.idea/
+*.iml
+
 
 # git credential file
 .gitconfig.local
@@ -37,3 +40,6 @@ fish/fish_history
 
 # random
 shilocation
+
+# package lock
+package-lock.json
