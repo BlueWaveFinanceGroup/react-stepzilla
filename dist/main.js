@@ -17,6 +17,10 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -57,10 +61,20 @@ function (_Component) {
     _this.applyValidationFlagsToSteps();
 
     return _this;
-  } // extend the "steps" array with flags to indicate if they have been validated
-
+  }
 
   _createClass(StepZilla, [{
+    key: "componentDidUpdate",
+    value: function componentDidUpdate(prevProps) {
+      if (prevProps.currentStep !== this.props.currentStep) {
+        this.setState({
+          compState: this.props.currentStep,
+          navState: this.getNavStates(this.props.currentStep, this.props.steps.length)
+        });
+      }
+    } // extend the "steps" array with flags to indicate if they have been validated
+
+  }, {
     key: "applyValidationFlagsToSteps",
     value: function applyValidationFlagsToSteps() {
       var _this2 = this;
@@ -138,19 +152,51 @@ function (_Component) {
 
   }, {
     key: "setNavState",
-    value: function setNavState(next) {
-      this.setState({
-        navState: this.getNavStates(next, this.props.steps.length)
-      });
+    value: function () {
+      var _setNavState = _asyncToGenerator(
+      /*#__PURE__*/
+      regeneratorRuntime.mark(function _callee(next) {
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                if (!this.props.onBeforeStepChange) {
+                  _context.next = 3;
+                  break;
+                }
 
-      if (next < this.props.steps.length) {
-        this.setState({
-          compState: next
-        });
+                _context.next = 3;
+                return this.props.onBeforeStepChange(this.state.compState, next);
+
+              case 3:
+                if (!this.props.dontAllowStepMoves) {
+                  this.setState({
+                    navState: this.getNavStates(next, this.props.steps.length)
+                  });
+
+                  if (next < this.props.steps.length) {
+                    this.setState({
+                      compState: next
+                    });
+                  }
+
+                  this.checkNavState(next);
+                }
+
+              case 4:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function setNavState(_x) {
+        return _setNavState.apply(this, arguments);
       }
 
-      this.checkNavState(next);
-    } // handles keydown on enter being pressed in any Child component input area. in this case it goes to the next (ignore textareas as they should allow line breaks)
+      return setNavState;
+    }() // handles keydown on enter being pressed in any Child component input area. in this case it goes to the next (ignore textareas as they should allow line breaks)
 
   }, {
     key: "handleKeyDown",
@@ -174,8 +220,9 @@ function (_Component) {
         this.setNavState(evt);
       } else {
         // the main navigation step ui is invoking a jump between steps
-        // if stepsNavigation is turned off or user clicked on existing step again (on step 2 and clicked on 2 again) then ignore
-        if (!this.props.stepsNavigation || evt.target.value === this.state.compState) {
+        var targetValue = evt.currentTarget.value; // if stepsNavigation is turned off or user clicked on existing step again (on step 2 and clicked on 2 again) then ignore
+
+        if (!this.props.stepsNavigation || targetValue === this.state.compState) {
           evt.preventDefault();
           evt.stopPropagation();
           return;
@@ -183,7 +230,7 @@ function (_Component) {
 
 
         evt.persist();
-        var movingBack = evt.target.value < this.state.compState; // are we trying to move back or front?
+        var movingBack = targetValue < this.state.compState; // are we trying to move back or front?
 
         var passThroughStepsNotValid = false; // if we are jumping forward, only allow that if inbetween steps are all validated. This flag informs the logic...
 
@@ -204,7 +251,7 @@ function (_Component) {
               // looks like we are moving forward, 'reduce' a new array of step>validated values we need to check and
               // ... 'some' that to get a decision on if we should allow moving forward
               passThroughStepsNotValid = _this3.props.steps.reduce(function (a, c, i) {
-                if (i >= _this3.state.compState && i < evt.target.value) {
+                if (i >= _this3.state.compState && i < targetValue) {
                   a.push(c.validated);
                 }
 
@@ -222,10 +269,10 @@ function (_Component) {
         }).then(function () {
           // this is like finally(), executes if error no no error
           if (proceed && !passThroughStepsNotValid) {
-            if (evt.target.value === _this3.props.steps.length - 1 && _this3.state.compState === _this3.props.steps.length - 1) {
+            if (targetValue === _this3.props.steps.length - 1 && _this3.state.compState === _this3.props.steps.length - 1) {
               _this3.setNavState(_this3.props.steps.length);
             } else {
-              _this3.setNavState(evt.target.value);
+              _this3.setNavState(targetValue);
             }
           }
         }).catch(function (e) {
@@ -283,7 +330,7 @@ function (_Component) {
     key: "updateStepValidationFlag",
     value: function updateStepValidationFlag() {
       var val = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
-      this.props.steps[this.state.compState].validated = val; // note: if a step component returns 'underfined' then treat as "true".
+      this.props.steps[this.state.compState].validated = val; // note: if a step component returns 'undefined' then treat as "true".
     } // are we allowed to move forward? via the next button or via jumpToStep?
 
   }, {
@@ -327,11 +374,15 @@ function (_Component) {
 
   }, {
     key: "getClassName",
-    value: function getClassName(className, i) {
+    value: function getClassName(className, i, additionalClassName) {
       var liClassName = "".concat(className, "-").concat(this.state.navState.styles[i]); // if step ui based navigation is disabled, then dont highlight step
 
       if (!this.props.stepsNavigation) {
         liClassName += ' no-hl';
+      }
+
+      if (additionalClassName !== undefined && additionalClassName !== null) {
+        liClassName += " ".concat(additionalClassName);
       }
 
       return liClassName;
@@ -344,13 +395,13 @@ function (_Component) {
 
       return this.props.steps.map(function (s, i) {
         return _react.default.createElement("li", {
-          className: _this5.getClassName('progtrckr', i),
+          className: _this5.getClassName('progtrckr', i, _this5.props.steps[i].additionalClassName),
           onClick: function onClick(evt) {
             _this5.jumpToStep(evt);
           },
           key: i,
           value: i
-        }, _react.default.createElement("em", null, i + 1), _react.default.createElement("span", null, _this5.props.steps[i].name));
+        }, _react.default.createElement("em", null, i + 1), _react.default.createElement("a", null, _this5.props.steps[i].name));
       });
     } // main render of stepzilla container
 
@@ -399,7 +450,7 @@ function (_Component) {
           _this6.previous();
         },
         id: "prev-button"
-      }, this.props.backButtonText), _react.default.createElement("button", {
+      }, this.props.backButtonChildren, this.props.backButtonText), _react.default.createElement("button", {
         type: "button",
         style: showNextBtn ? {} : this.hidden,
         className: props.nextButtonCls,
@@ -407,7 +458,7 @@ function (_Component) {
           _this6.next();
         },
         id: "next-button"
-      }, nextStepText)));
+      }, this.props.nextButtonChildren, nextStepText)));
     }
   }]);
 
@@ -421,8 +472,10 @@ StepZilla.defaultProps = {
   stepsNavigation: true,
   prevBtnOnLastStep: true,
   dontValidate: false,
+  dontAllowStepMoves: false,
   preventEnterSubmission: false,
   startAtStep: 0,
+  currentStep: 0,
   nextButtonText: 'Next',
   nextButtonCls: 'btn btn-prev btn-primary btn-lg pull-right',
   backButtonText: 'Previous',
@@ -432,19 +485,25 @@ StepZilla.defaultProps = {
 StepZilla.propTypes = {
   steps: _propTypes.default.arrayOf(_propTypes.default.shape({
     name: _propTypes.default.oneOfType([_propTypes.default.string, _propTypes.default.object]).isRequired,
-    component: _propTypes.default.element.isRequired
+    component: _propTypes.default.element.isRequired,
+    additionalClassName: _propTypes.default.string
   })).isRequired,
   showSteps: _propTypes.default.bool,
   showNavigation: _propTypes.default.bool,
   stepsNavigation: _propTypes.default.bool,
   prevBtnOnLastStep: _propTypes.default.bool,
   dontValidate: _propTypes.default.bool,
+  dontAllowStepMoves: _propTypes.default.bool,
   preventEnterSubmission: _propTypes.default.bool,
   startAtStep: _propTypes.default.number,
-  nextButtonText: _propTypes.default.string,
+  currentStep: _propTypes.default.number,
+  nextButtonChildren: _propTypes.default.object,
   nextButtonCls: _propTypes.default.string,
+  nextButtonText: _propTypes.default.string,
+  backButtonChildren: _propTypes.default.object,
   backButtonCls: _propTypes.default.string,
   backButtonText: _propTypes.default.string,
   hocValidationAppliedTo: _propTypes.default.array,
+  onBeforeStepChange: _propTypes.default.func,
   onStepChange: _propTypes.default.func
 };

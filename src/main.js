@@ -21,6 +21,15 @@ export default class StepZilla extends Component {
     this.applyValidationFlagsToSteps();
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.currentStep !== this.props.currentStep) {
+      this.setState({
+        compState: this.props.currentStep,
+        navState: this.getNavStates(this.props.currentStep, this.props.steps.length)
+      });
+    }
+  }
+
   // extend the "steps" array with flags to indicate if they have been validated
   applyValidationFlagsToSteps() {
     this.props.steps.map((i, idx) => {
@@ -92,14 +101,20 @@ export default class StepZilla extends Component {
   }
 
   // set the nav state
-  setNavState(next) {
-    this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
-
-    if (next < this.props.steps.length) {
-      this.setState({ compState: next });
+  async setNavState(next) {
+    if (this.props.onBeforeStepChange) {
+      await this.props.onBeforeStepChange(this.state.compState, next);
     }
 
-    this.checkNavState(next);
+    if (!this.props.dontAllowStepMoves) {
+      this.setState({ navState: this.getNavStates(next, this.props.steps.length) });
+
+      if (next < this.props.steps.length) {
+        this.setState({ compState: next });
+      }
+
+      this.checkNavState(next);
+    }
   }
 
   // handles keydown on enter being pressed in any Child component input area. in this case it goes to the next (ignore textareas as they should allow line breaks)
@@ -119,8 +134,9 @@ export default class StepZilla extends Component {
       // a child step wants to invoke a jump between steps. in this case 'evt' is the numeric step number and not the JS event
       this.setNavState(evt);
     } else { // the main navigation step ui is invoking a jump between steps
+      const targetValue = evt.currentTarget.value;
       // if stepsNavigation is turned off or user clicked on existing step again (on step 2 and clicked on 2 again) then ignore
-      if (!this.props.stepsNavigation || evt.target.value === this.state.compState) {
+      if (!this.props.stepsNavigation || targetValue === this.state.compState) {
         evt.preventDefault();
         evt.stopPropagation();
 
@@ -130,7 +146,7 @@ export default class StepZilla extends Component {
       // evt is a react event so we need to persist it as we deal with aync promises which nullifies these events (https://facebook.github.io/react/docs/events.html#event-pooling)
       evt.persist();
 
-      const movingBack = evt.target.value < this.state.compState; // are we trying to move back or front?
+      const movingBack = targetValue < this.state.compState; // are we trying to move back or front?
       let passThroughStepsNotValid = false; // if we are jumping forward, only allow that if inbetween steps are all validated. This flag informs the logic...
       let proceed = false; // flag on if we should move on
 
@@ -150,7 +166,7 @@ export default class StepZilla extends Component {
               // ... 'some' that to get a decision on if we should allow moving forward
               passThroughStepsNotValid = this.props.steps
                 .reduce((a, c, i) => {
-                  if (i >= this.state.compState && i < evt.target.value) {
+                  if (i >= this.state.compState && i < targetValue) {
                     a.push(c.validated);
                   }
                   return a;
@@ -170,11 +186,11 @@ export default class StepZilla extends Component {
         .then(() => {
           // this is like finally(), executes if error no no error
           if (proceed && !passThroughStepsNotValid) {
-            if (evt.target.value === (this.props.steps.length - 1)
+            if (targetValue === (this.props.steps.length - 1)
               && this.state.compState === (this.props.steps.length - 1)) {
               this.setNavState(this.props.steps.length);
             } else {
-              this.setNavState(evt.target.value);
+              this.setNavState(targetValue);
             }
           }
         })
@@ -223,7 +239,7 @@ export default class StepZilla extends Component {
 
   // update step's validation flag
   updateStepValidationFlag(val = true) {
-    this.props.steps[this.state.compState].validated = val; // note: if a step component returns 'underfined' then treat as "true".
+    this.props.steps[this.state.compState].validated = val; // note: if a step component returns 'undefined' then treat as "true".
   }
 
   // are we allowed to move forward? via the next button or via jumpToStep?
@@ -262,12 +278,16 @@ export default class StepZilla extends Component {
   }
 
   // get the classmame of steps
-  getClassName(className, i) {
+  getClassName(className, i, additionalClassName) {
     let liClassName = `${className}-${this.state.navState.styles[i]}`;
 
     // if step ui based navigation is disabled, then dont highlight step
     if (!this.props.stepsNavigation) {
       liClassName += ' no-hl';
+    }
+
+    if (additionalClassName !== undefined && additionalClassName !== null) {
+      liClassName += ` ${additionalClassName}`;
     }
 
     return liClassName;
@@ -276,9 +296,9 @@ export default class StepZilla extends Component {
   // render the steps as stepsNavigation
   renderSteps() {
     return this.props.steps.map((s, i) => (
-      <li className={this.getClassName('progtrckr', i)} onClick={(evt) => { this.jumpToStep(evt); }} key={i} value={i}>
+      <li className={this.getClassName('progtrckr', i, this.props.steps[i].additionalClassName)} onClick={(evt) => { this.jumpToStep(evt); }} key={i} value={i}>
           <em>{i + 1}</em>
-          <span>{this.props.steps[i].name}</span>
+          <a>{this.props.steps[i].name}</a>
       </li>
     ));
   }
@@ -325,6 +345,7 @@ export default class StepZilla extends Component {
             onClick={() => { this.previous(); }}
             id="prev-button"
           >
+            {this.props.backButtonChildren}
             {this.props.backButtonText}
           </button>
           <button
@@ -334,6 +355,7 @@ export default class StepZilla extends Component {
             onClick={() => { this.next(); }}
             id="next-button"
           >
+            {this.props.nextButtonChildren}
             {nextStepText}
           </button>
         </div>
@@ -348,8 +370,10 @@ StepZilla.defaultProps = {
   stepsNavigation: true,
   prevBtnOnLastStep: true,
   dontValidate: false,
+  dontAllowStepMoves: false,
   preventEnterSubmission: false,
   startAtStep: 0,
+  currentStep: 0,
   nextButtonText: 'Next',
   nextButtonCls: 'btn btn-prev btn-primary btn-lg pull-right',
   backButtonText: 'Previous',
@@ -363,19 +387,25 @@ StepZilla.propTypes = {
       PropTypes.string,
       PropTypes.object
     ]).isRequired,
-    component: PropTypes.element.isRequired
+    component: PropTypes.element.isRequired,
+    additionalClassName: PropTypes.string
   })).isRequired,
   showSteps: PropTypes.bool,
   showNavigation: PropTypes.bool,
   stepsNavigation: PropTypes.bool,
   prevBtnOnLastStep: PropTypes.bool,
   dontValidate: PropTypes.bool,
+  dontAllowStepMoves: PropTypes.bool,
   preventEnterSubmission: PropTypes.bool,
   startAtStep: PropTypes.number,
-  nextButtonText: PropTypes.string,
+  currentStep: PropTypes.number,
+  nextButtonChildren: PropTypes.object,
   nextButtonCls: PropTypes.string,
+  nextButtonText: PropTypes.string,
+  backButtonChildren: PropTypes.object,
   backButtonCls: PropTypes.string,
   backButtonText: PropTypes.string,
   hocValidationAppliedTo: PropTypes.array,
+  onBeforeStepChange: PropTypes.func,
   onStepChange: PropTypes.func
 };
